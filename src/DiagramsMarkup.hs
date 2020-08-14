@@ -61,11 +61,11 @@ viewPort
     -> NormalDiagram
 viewPort = undefined
 
-toLine
+dline
     :: (NormalDiagram -> NormalDiagram)
     -> NormalDiagram -- ^ any diagram
     -> FrexDiagram
-toLine align line w = D.alignL $ mconcat $ map align
+dline align line w = D.alignL $ mconcat $ map align
     [ line
     , D.phantom (D.rect w 1 :: NormalDiagram)
     ]
@@ -77,26 +77,34 @@ dlines
     -> String
     -> Double -- ^ container width
     -> [NormalDiagram] -- ^ lines
-dlines align size opt str w
-    = map (\ line -> toLine align line w)
-    $ dlines' (dwords size opt str) w
+dlines align size opt str w = dlines' align size (dwords opt str) w
 
 dlines'
-    :: [NormalDiagram] -- ^ words
+    :: (NormalDiagram -> NormalDiagram) -- ^ Left or Center or Right
+    -> Double -- ^ size
+    -> [NormalDiagram] -- ^ words
     -> Double -- ^ container width
     -> [NormalDiagram] -- ^ lines
-dlines' [] _ = []
-dlines' (d:ds) w = case lastMay $ takeWhile ((< w) . D.width . D.hsep 0.3) $ inits (d:ds) of
-    Just []  -> d : dlines' ds w
-    Just ds' -> D.hsep 0.3 ds' : dlines' (drop (length ds') (d:ds)) w
-    _        -> [D.hsep 0.3 $ d:ds]
+dlines' align size ws w = map (\ line -> dline align line w) $ go $ map (D.scale size) ws
+ where go :: [NormalDiagram] -> [NormalDiagram]
+       go (d:ds) = case lastMay $ takeWhile ((< w) . D.width . catWords) $ inits (d:ds) of
+           Just []  -> d : go ds
+           Just ds' -> catWords ds' : go (drop (length ds') (d:ds))
+           _        -> [catWords $ d:ds]
+       go [] = []
+       catWords = D.hsep (size * 0.3)
 
 dwords
-    :: Double -- ^ size
-    -> TextOpts Double
-    -> String -- ^ chars
+    :: TextOpts Double
+    -> String -- ^ string of words
     -> [NormalDiagram] -- ^ words
-dwords size opt str = map (D.scale size . textSVG_ opt) $ words str
+dwords opt str = map (dword opt) $ words str
+
+dword
+    :: TextOpts Double
+    -> String -- ^ string of a word
+    -> NormalDiagram
+dword = textSVG_
 
 makeLinesWithFloat
     :: (NormalDiagram -> NormalDiagram) -- ^ Left or Right
@@ -110,14 +118,23 @@ itemize
     :: NormalDiagram
     -> Double -- ^ size
     -> TextOpts Double
-    -> [String]
+    -> [String] -- ^ strings to be itemized
     -> Double
     -> [[NormalDiagram]] -- ^ list of lines
-itemize marker size opt strs w = map item strs
- where item :: String -> [NormalDiagram] -- ^ lines
-       item str = case dlines D.alignL size opt str w' of
+itemize marker size opt strs w = itemize' marker size (map (dwords opt) strs) w
+
+itemize'
+    :: NormalDiagram
+    -> Double -- ^ size
+    -> [[NormalDiagram]] -- ^ strings to be itemized
+    -> Double
+    -> [[NormalDiagram]] -- ^ list of lines
+itemize' marker size strs w = map item strs
+ where item
+           :: [NormalDiagram] -- ^ words
+           -> [NormalDiagram] -- ^ lines
+       item ws = case dlines' D.alignL size ws w' of
            [] -> []
            (l:ls) -> D.alignL (marker ||| l) : map (D.alignL . (D.phantom marker |||)) ls
         where w' = w - markerWidth
               markerWidth = D.width marker 
-
