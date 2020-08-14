@@ -15,7 +15,7 @@ import Data.List (find, inits)
 twoColums
     :: Double -- ^ gap
     -> (Double -> [NormalDiagram]) -- ^ function to produce lines
-    -> FrexNormalDiagram
+    -> FrexDiagram
 twoColums gap toLines w = case find ((h' <) . totalHeight) $ inits ls of
     Just ls' -> D.hcat $ map (D.vsep gap) [ls', drop (length ls') ls]
     Nothing  -> mempty
@@ -25,33 +25,33 @@ twoColums gap toLines w = case find ((h' <) . totalHeight) $ inits ls of
        h' = h / 2
 
 hcat
-    :: [FrexNormalDiagram]
-    -> FrexNormalDiagram
+    :: [FrexDiagram]
+    -> FrexDiagram
 hcat = hsep 0
 
 hsep
     :: Double -- ^ gap
-    -> [FrexNormalDiagram]
-    -> FrexNormalDiagram
+    -> [FrexDiagram]
+    -> FrexDiagram
 hsep gap fs w = D.hsep gap $ map ($ w') fs
  where w' = (w - fromIntegral (n - 1) * gap) / fromIntegral n
        n = length fs
 vcat
-    :: [FrexNormalDiagram]
-    -> FrexNormalDiagram
+    :: [FrexDiagram]
+    -> FrexDiagram
 vcat = vsep 0
 
 vsep
     :: Double -- ^ gap
-    -> [FrexNormalDiagram]
-    -> FrexNormalDiagram
+    -> [FrexDiagram]
+    -> FrexDiagram
 vsep gap fs w = D.vsep gap $ map ($ w) fs
 
 hcat2
     :: Double -- ^ minimum width of one column
     -> Bool -- ^ willWrap?
-    -> [FrexNormalDiagram] -- ^ function to produce lines
-    -> FrexNormalDiagram
+    -> [FrexDiagram] -- ^ function to produce lines
+    -> FrexDiagram
 hcat2 = undefined
 
 viewPort
@@ -64,7 +64,7 @@ viewPort = undefined
 toLine
     :: (NormalDiagram -> NormalDiagram)
     -> NormalDiagram -- ^ any diagram
-    -> FrexNormalDiagram
+    -> FrexDiagram
 toLine align line w = D.alignL $ mconcat $ map align
     [ line
     , D.phantom (D.rect w 1 :: NormalDiagram)

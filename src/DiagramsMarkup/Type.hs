@@ -7,4 +7,4 @@ import Diagrams.Backend.SVG (B)
 
 type NormalDiagram = Diagram B
 
-type FrexNormalDiagram = Double -> NormalDiagram
+type FrexDiagram = Double -> NormalDiagram

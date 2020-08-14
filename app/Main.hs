@@ -16,7 +16,7 @@ main = renderTest
 renderTest :: IO ()
 renderTest = renderSVG  "topPage.svg" (mkWidth 5000) $ bg white $ topPage 50
 
-topPage :: FrexNormalDiagram
+topPage :: FrexDiagram
 topPage = M.vsep 0.5
     [ h1 "This is H1 header!"
     , M.hsep 3
@@ -62,18 +62,18 @@ topPage = M.vsep 0.5
             ]
         ]
     ]
- where h1 :: String -> FrexNormalDiagram
+ where h1 :: String -> FrexDiagram
        h1 str = blueStyle . vsep 0.5 . M.dlines alignL 2 def str
-       h2 :: String -> FrexNormalDiagram
+       h2 :: String -> FrexDiagram
        h2 str = blueStyle . vsep 0.5 . M.dlines alignL 1.5 def str
-       p :: String -> FrexNormalDiagram
+       p :: String -> FrexDiagram
        p str = blackStyle . vcat . M.dlines alignL 1 def str
        blueStyle = lw none . fc blue
        blackStyle = lw none . fc black
-       figure :: NormalDiagram -> FrexNormalDiagram
+       figure :: NormalDiagram -> FrexDiagram
        figure d = M.toLine center $ frame 1 d
-       caption :: String -> FrexNormalDiagram
+       caption :: String -> FrexDiagram
        caption str = blackStyle . vcat . M.dlines center 1 def str
-       ul :: [String] -> FrexNormalDiagram
+       ul :: [String] -> FrexDiagram
        ul strs = blackStyle . vsep 0.5 . map vcat . M.itemize squareBullet 1 def strs
         where squareBullet = translateY 0.2 $ mconcat [translateX 0.2 $ strutX 2, square 0.3]
