@@ -6,8 +6,6 @@ module Main where
 import Diagrams.Prelude hiding (view)
 -- diagrams-svg
 import Diagrams.Backend.SVG (renderSVG)
--- SVGFonts
-import Graphics.SVGFonts (TextOpts(..))
 -- diagrams-markup
 import DiagramsMarkup.Type
 import qualified DiagramsMarkup as M
@@ -17,6 +15,7 @@ main = renderTest
 
 renderTest :: IO ()
 renderTest = renderSVG  "topPage.svg" (mkWidth 5000) $ bg white $ topPage 50
+-- (baselineText "Hello world!" <> alignB (alignL (fc green $ rect 8 1)) :: NormalDiagram)
 
 topPage :: FrexDiagram
 topPage = M.vsep 0.5
@@ -95,13 +94,13 @@ topPage = M.vsep 0.5
         ]
     ]
  where h1 :: String -> FrexDiagram
-       h1 str = bg skyblue . blueStyle . vsep 0.5 . M.dlines alignL 2 def str
+       h1 str = bg skyblue . blueStyle . vsep 0.5 . M.dlines alignL 2 M.fontCalibri str
        
        h2 :: String -> FrexDiagram
-       h2 str = blueStyle . vsep 0.5 . M.dlines alignL 1.5 def str
+       h2 str = blueStyle . vsep 0.5 . M.dlines alignL 1.5 M.fontCalibri str
        
        p :: String -> FrexDiagram
-       p = p' . M.dwords def
+       p = p' . M.dwords M.fontCalibri
        
        p' :: [NormalDiagram] -> FrexDiagram
        p' ws = blackStyle . vcat . M.dlines' alignL 1 ws
@@ -110,16 +109,16 @@ topPage = M.vsep 0.5
        figure d = M.dline center $ frame 1 d
        
        caption :: String -> FrexDiagram
-       caption str = blackStyle . vcat . M.dlines center 1 def str
+       caption str = blackStyle . vcat . M.dlines center 1 M.fontCalibri str
        
        em :: String -> NormalDiagram
-       em = redStyle . M.dword (def { underline = True })
+       em = redStyle . M.dword M.fontCalibri
        
        plain :: String -> [NormalDiagram]
-       plain str = M.dwords def str
+       plain str = M.dwords M.fontCalibri str
        
        ul :: [String] -> FrexDiagram
-       ul = ul' . map (M.dwords def)
+       ul = ul' . map (M.dwords M.fontCalibri)
        
        ul' :: [[NormalDiagram]] -> FrexDiagram
        ul' strs = blackStyle . vsep 0.5 . map vcat . M.itemize' squareBullet 1 strs

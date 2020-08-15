@@ -2,15 +2,19 @@ module DiagramsMarkup where
 
 -- diagrams
 import Diagrams.Prelude ((|||))
+import qualified Diagrams.TwoD  as D
 import qualified Diagrams.Prelude as D
 -- SVGFonts
-import Graphics.SVGFonts (textSVG_, TextOpts(..))
+import Graphics.SVGFonts (textSVG_, TextOpts(..), Spacing(..), Mode(..))
+import Graphics.SVGFonts.Fonts (loadDataFont, lin, bit)
+import Graphics.SVGFonts.ReadFont (PreparedFont)
 -- diagrams-markup
 import DiagramsMarkup.Type
 -- safe
 import Safe (lastMay)
 -- base
 import Data.List (find, inits)
+import System.IO.Unsafe (unsafePerformIO)
 
 twoColums
     :: Double -- ^ gap
@@ -73,7 +77,7 @@ dline align line w = D.alignL $ mconcat $ map align
 dlines
     :: (NormalDiagram -> NormalDiagram) -- ^ Left or Center or Right
     -> Double -- ^ size
-    -> TextOpts Double
+    -> Font
     -> String
     -> Double -- ^ container width
     -> [NormalDiagram] -- ^ lines
@@ -95,16 +99,20 @@ dlines' align size ws w = map (\ line -> dline align line w) $ go $ map (D.scale
        catWords = D.hsep (size * 0.3)
 
 dwords
-    :: TextOpts Double
+    :: Font
     -> String -- ^ string of words
     -> [NormalDiagram] -- ^ words
 dwords opt str = map (dword opt) $ words str
 
 dword
-    :: TextOpts Double
+    :: Font
     -> String -- ^ string of a word
     -> NormalDiagram
-dword = textSVG_
+dword (Font{..}) str = mconcat
+    [ D.scale 0.747765 $ D.font fontName $ D.baselineText str
+    , D.phantom (D.boundingRect (textSVG_ opt str :: NormalDiagram) :: NormalDiagram)
+    ]
+ where opt = TextOpts fontData INSIDE_H KERN False 1 1
 
 makeLinesWithFloat
     :: (NormalDiagram -> NormalDiagram) -- ^ Left or Right
@@ -117,7 +125,7 @@ makeLinesWithFloat = undefined
 itemize
     :: NormalDiagram
     -> Double -- ^ size
-    -> TextOpts Double
+    -> Font
     -> [String] -- ^ strings to be itemized
     -> Double
     -> [[NormalDiagram]] -- ^ list of lines
@@ -138,3 +146,20 @@ itemize' marker size strs w = map item strs
            (l:ls) -> D.alignL (marker ||| l) : map (D.alignL . (D.phantom marker |||)) ls
         where w' = w - markerWidth
               markerWidth = D.width marker 
+
+data Font = Font
+    { fontName :: String
+    , fontData :: PreparedFont Double
+    }
+
+fontCalibri :: Font
+fontCalibri = Font "Calibri" $ unsafePerformIO $ loadDataFont "fonts/Calibri.svg"
+
+fontLin :: Font
+fontLin = Font "LIbertine" $ unsafePerformIO lin
+
+fontBit :: Font
+fontBit = Font "Bitstream" $ unsafePerformIO bit
+
+-- myDefaultTextOpts :: TextOpts Double
+-- myDefaultTextOpts = TextOpts (unsafePerformIO calibri) INSIDE_H KERN False 1 1
