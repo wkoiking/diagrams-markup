@@ -12,6 +12,7 @@ maintainer:          wanagida@gmail.com
 -- copyright:           
 -- category:            
 build-type:          Simple
+data-files:          fonts/*.svg
 extra-source-files:  README.md
 cabal-version:       >=1.10
 

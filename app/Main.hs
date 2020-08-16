@@ -15,13 +15,12 @@ main = renderTest
 
 renderTest :: IO ()
 renderTest = renderSVG  "topPage.svg" (mkWidth 5000) $ bg white $ topPage 50
--- (baselineText "Hello world!" <> alignB (alignL (fc green $ rect 8 1)) :: NormalDiagram)
 
 topPage :: FrexDiagram
-topPage = M.vsep 0.5
+topPage = M.vsepBlock 0.5
     [ h1 "This is H1 header!"
-    , M.hsep 3
-        [ M.vsep 0.5
+    , M.hsepBlock 3
+        [ M.vsepBlock 0.5
             [ h2 "This is H2 header"
             , p $ concat
                 [ "Hypertext Markup Language (HTML) is the standard markup language for "
@@ -51,7 +50,7 @@ topPage = M.vsep 0.5
                 , plain "and so on .."
                 ]
             ]
-        , M.vsep 0.5
+        , M.vsepBlock 0.5
             [ h2 "This is H2 header"
             , p $ concat
                 [ "Web browsers receive HTML documents from a web server or from local "
@@ -72,7 +71,7 @@ topPage = M.vsep 0.5
             , caption "This is circle on triangle" 
             ]
         ]
-    , M.vsep 0.5
+    , M.vsepBlock 0.5
         [ h2 "This is H2 header"
         , p' $ concat
             [ plain $ concat
@@ -94,22 +93,22 @@ topPage = M.vsep 0.5
         ]
     ]
  where h1 :: String -> FrexDiagram
-       h1 str = bg skyblue . blueStyle . vsep 0.5 . M.dlines alignL 2 M.fontCalibri str
+       h1 str = bg skyblue . blueStyle . vsep 0.5 . M.dlines M.fontCalibri alignL 2 str
        
        h2 :: String -> FrexDiagram
-       h2 str = blueStyle . vsep 0.5 . M.dlines alignL 1.5 M.fontCalibri str
+       h2 str = blueStyle . vsep 0.5 . M.dlines M.fontCalibri alignL 1.5 str
        
        p :: String -> FrexDiagram
-       p = p' . M.dwords M.fontCalibri
+       p str = blackStyle . vcat . M.dlines M.fontCalibri alignL 1 str
        
        p' :: [NormalDiagram] -> FrexDiagram
-       p' ws = blackStyle . vcat . M.dlines' alignL 1 ws
+       p' ws = blackStyle . vcat . M.dlines' (M.fontSpacing M.fontCalibri) alignL 1 ws
        
        figure :: NormalDiagram -> FrexDiagram
        figure d = M.dline center $ frame 1 d
        
        caption :: String -> FrexDiagram
-       caption str = blackStyle . vcat . M.dlines center 1 M.fontCalibri str
+       caption str = blackStyle . vcat . M.dlines M.fontCalibri center 1 str
        
        em :: String -> NormalDiagram
        em = redStyle . M.dword M.fontCalibri
@@ -118,11 +117,13 @@ topPage = M.vsep 0.5
        plain str = M.dwords M.fontCalibri str
        
        ul :: [String] -> FrexDiagram
-       ul = ul' . map (M.dwords M.fontCalibri)
+       ul strs = blackStyle . vsep 0.5 . map vcat . M.itemize M.fontCalibri squareBullet 1 strs
        
        ul' :: [[NormalDiagram]] -> FrexDiagram
-       ul' strs = blackStyle . vsep 0.5 . map vcat . M.itemize' squareBullet 1 strs
-        where squareBullet = translateY 0.2 $ mconcat [translateX 0.2 $ strutX 2, square 0.3]
+       ul' strs = blackStyle . vsep 0.5 . map vcat . M.itemize' (M.fontSpacing M.fontCalibri) squareBullet 1 strs
+
+       squareBullet :: NormalDiagram
+       squareBullet = translateY 0.2 $ mconcat [translateX 0.2 $ strutX 2, square 0.3]
 
        blueStyle = lw none . fc blue
        blackStyle = lw none . fc black
